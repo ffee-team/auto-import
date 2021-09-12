@@ -52,22 +52,17 @@ export namespace Utils {
     return [name];
   };
 
-  export const readJSONSync = (pkgPath: string) => {
+  export const readJSONSync = (jsonPath: string) => {
     try {
-      return fs.readJSONSync(pkgPath);
+      return fs.readJSONSync(jsonPath);
     } catch (error: any) {
       logger("Read JSON Error:", error.message);
       return null;
     }
   };
 
-  export const writeJSONSync = (pkgPath: string, data: any) => {
-    try {
-      fs.writeJSONSync(pkgPath, data);
-      return true;
-    } catch (error: any) {
-      logger("Write JSON Error:", error.message);
-      return false;
-    }
+  export const writeJSONSync = (jsonPath: string, json: any) => {
+    fs.writeJSONSync(jsonPath, json);
+    return true;
   };
 }
