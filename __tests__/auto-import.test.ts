@@ -1,6 +1,8 @@
+import path from "path";
 import fs from "fs-extra";
 import { Utils } from "../src/utils";
 import { AutoImport } from "../src/auto-import";
+import { execSync } from 'child_process';
 
 describe("#auto-import tester", () => {
   beforeAll(() => {
@@ -9,6 +11,9 @@ describe("#auto-import tester", () => {
     };
   });
   
+  afterAll(() => {
+    execSync('rm -rf ' + path.join(__dirname, 'node_modules'));
+  });
 
   describe("#method: getNpmInfo", () => {
     test('getNpmInfo success:', async() => {
@@ -40,7 +45,7 @@ describe("#auto-import tester", () => {
   });
 
   describe("#method: setModuleExpireTime", () => {
-    const modName = "chalk";
+    const modName = "react";
     const root = __dirname;
     const expire = 2000;
     beforeAll(async() => {
@@ -51,12 +56,10 @@ describe("#auto-import tester", () => {
       const modPkgPath = Utils.setModulePkgPath(modName, root);
       expect(fs.existsSync(modPkgPath)).toBe(false);
       
-      
       const res = AutoImport.setModuleExpireTime(modName, {
         root,
         expire
       });
-
       expect(res).toBe(false);
     });
 
@@ -64,7 +67,7 @@ describe("#auto-import tester", () => {
       await AutoImport.install(modName, { root });
       const modPkgPath = Utils.setModulePkgPath(modName, root);
       expect(fs.existsSync(modPkgPath)).toBe(true);
- 
+
       const res = AutoImport.setModuleExpireTime(modName, {
         root,
         expire
@@ -99,6 +102,16 @@ describe("#auto-import tester", () => {
       expect(res).toEqual(true);
       expect(typeof mod === "function").toBe(true);
       expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+    });
+  });
+
+  describe("#method: installAndRequire", () => {
+    test("install a module success: install('express')", async () => {
+      
+    });
+
+    test("install a module success: install('koa', __dirname)", async () => {
+   
     });
   });
 });
