@@ -134,7 +134,7 @@ describe("#Utils tester", () => {
   describe("Utils.readJSONSync", () => {
     test("Utils.readJSONSync: success", async () => {
       const result = Utils.readJSONSync(Utils.DEFAULT_ROOT + "/package.json");
-      expect(result.name).toEqual("auto-import");
+      expect(result.name).toEqual("@ffee/auto-import");
     });
     test("Utils.readJSONSync: fail", async () => {
       const result = Utils.readJSONSync("./notest.json");
