@@ -35,15 +35,27 @@ export namespace AutoImport {
     const url = `${registry}/${encodeURIComponent(name)}/latest`;
     Utils.logger("getNpmInfo:", url);
 
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve) =>
       request(url, (error, response, body) => {
         if (error) {
-          reject(error);
+          resolve({
+            status: false,
+            code: 500,
+            error: JSON.parse(JSON.stringify(error))
+          });
         } else {
-          if (response && response.statusCode === 200) {
-            resolve(JSON.parse(body));
+          if (response && response.statusCode === 200 && body) {
+            resolve({
+              status: true,
+              code: 200,
+              data: JSON.parse(body)
+            });
           } else {
-            reject(JSON.parse(body));
+            resolve({
+              status: false,
+              code: response.statusCode,
+              error: null
+            });
           }
         }
       })
@@ -52,7 +64,7 @@ export namespace AutoImport {
 
   export const setModuleExpireTime = (
     name: string,
-    opts: ModuleExprireTimeOptions = {}
+    opts: ModuleExprireTimeOptions
   ) => {
     const { root = Utils.DEFAULT_ROOT, expire } = opts;
     const [modName] = Utils.formatModuleName(name);
@@ -159,11 +171,19 @@ export namespace AutoImport {
           localPkgInfo.__expire &&
           Utils.DEFAULT_TIME_NOW <= localPkgInfo.__expire
         ) {
+          Utils.logger(name, "not expired, return current...");
           return Utils.globalRequire(modPath);
         }
-        return await installAndRequire(modName, {
-          ...opts,
-        });
+
+        const pkgInfo = await getNpmInfo(modName);
+        if (pkgInfo.status && semver.lt(localPkgInfo.version, pkgInfo.data.version)) {
+          Utils.logger(name, "expired, install and require...");
+          return await installAndRequire(name, {
+            ...opts,
+          });
+        }
+
+        return Utils.globalRequire(modPath);
       }
     }
   };
