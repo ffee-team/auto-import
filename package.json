@@ -74,7 +74,7 @@
       "<rootDir>/node_modules"
     ],
     "collectCoverage": true,
-    "testRegex": "(/__tests__/auto-import\\.(test|spec))\\.ts",
+    "testRegex": "(/__tests__/(.+)\\.(test|spec))\\.ts",
     "moduleFileExtensions": [
       "ts",
       "js"

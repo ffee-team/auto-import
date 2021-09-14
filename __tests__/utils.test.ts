@@ -110,10 +110,6 @@ describe("#Utils tester", () => {
   });
 
   describe("Utils.setExpireTime", () => {
-    test("Utils.setExpireTime()", async () => {
-      const time = Utils.setExpireTime();
-      expect(time).toEqual(Utils.DEFAULT_TIME_NOW + 3600 * 1000);
-    });
     test("Utils.setExpireTime(1000)", async () => {
       const time = Utils.setExpireTime(1000);
       expect(time).toEqual(Utils.DEFAULT_TIME_NOW + 1000 * 1000);

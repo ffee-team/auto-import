@@ -1,5 +1,5 @@
 const { AutoImport } = require('../lib');
 
-AutoImport.require('koa').then((mod) => {
+AutoImport.require('ora').then((mod) => {
   console.log(mod);
 });
