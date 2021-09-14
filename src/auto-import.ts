@@ -1,4 +1,4 @@
-import fs from "fs-extra";
+// import fs from "fs-extra";
 import semver from "semver";
 import request from "request";
 import { spawnSync, StdioOptions } from "child_process";
@@ -64,9 +64,9 @@ export namespace AutoImport {
 
   export const setModuleExpireTime = (
     name: string,
-    opts: ModuleExprireTimeOptions
+    opts: ModuleExprireTimeOptions = {}
   ) => {
-    const { root = Utils.DEFAULT_ROOT, expire } = opts;
+    const { root = Utils.DEFAULT_ROOT, expire = 3600 * 24 } = opts;
     const [modName] = Utils.formatModuleName(name);
     const pkgPath = Utils.setModulePkgPath(modName, root);
     try {
@@ -90,7 +90,7 @@ export namespace AutoImport {
   export const install = async (
     name: string,
     opts: InstallModuleOptions = {}
-  ): Promise<boolean> => {
+  ): Promise<void> => {
     const {
       root = Utils.DEFAULT_ROOT,
       registry = Utils.DEFAULT_REGISTRY,
@@ -106,29 +106,24 @@ export namespace AutoImport {
       `--registry=${registry}`,
       ...Utils.flatObject(other),
     ];
-    try {
-      spawnSync(installer, installArray, {
-        stdio: stdio || "inherit",
-      });
-      return true;
-    } catch (error: any) {
-      Utils.logger(error.message);
-    }
 
-    return false;
+    spawnSync(installer, installArray, {
+      stdio: stdio || "inherit",
+    });
   };
 
   export const installAndRequire = async (
     name: string,
-    opts: RequireModuleOptions
+    opts: RequireModuleOptions = {}
   ) => {
-    const { root = Utils.DEFAULT_ROOT, version, ...other } = opts;
-    const modPath = Utils.setModulePath(name, root);
-    const res = await install(name, opts);
-    if (res) {
-      setModuleExpireTime(name, opts);
+    const { root = Utils.DEFAULT_ROOT } = opts;
+    const [modName] = Utils.formatModuleName(name);
+    const modPath = Utils.setModulePath(modName, root);
+    await install(name, opts);
+    setModuleExpireTime(name, opts);
+    try {
       return Utils.globalRequire(modPath);
-    } else {
+    } catch (error) {
       return null;
     }
   };
@@ -136,10 +131,10 @@ export namespace AutoImport {
   export const require = async (
     name: string,
     opts: RequireModuleOptions = {}
-  ): Promise<NodeRequire | null> => {
+  ): Promise<any> => {
     const { root = Utils.DEFAULT_ROOT } = opts;
     const [modName, modVersion] = Utils.formatModuleName(name);
-    const modPath = Utils.setModulePath(name, root);
+    const modPath = Utils.setModulePath(modName, root);
     const modPkgPath = Utils.setModulePkgPath(modName, root);
     const localPkgInfo = Utils.readJSONSync(modPkgPath);
     // module not exists, instll now

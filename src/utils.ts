@@ -11,7 +11,7 @@ export namespace Utils {
     return debug("auto-import:")(args.join(" "));
   };
 
-  export const globalRequire = (id: string): NodeRequire => require(id);
+  export const globalRequire = (id: string) => require(id);
 
   export const getNpmCommand = (cmd: string) => {
     return require.resolve(`npminstall/bin/${cmd}.js`);
@@ -35,7 +35,7 @@ export namespace Utils {
    * set expire time
    * @param {number} expireTime module expire time
    */
-  export const setExpireTime = (expireTime: number = 3600) => {
+  export const setExpireTime = (expireTime: number) => {
     return DEFAULT_TIME_NOW + expireTime * 1000;
   };
 
