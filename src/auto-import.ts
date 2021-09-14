@@ -11,14 +11,14 @@ export namespace AutoImport {
     version?: string;
   }
 
-  interface InstallModuleOptions extends ModuleOptions {
+  export interface InstallModuleOptions extends ModuleOptions {
     registry?: string;
     stdio?: StdioOptions;
   }
 
-  interface RequireModuleOptions extends InstallModuleOptions {}
+  export interface RequireModuleOptions extends InstallModuleOptions { }
 
-  interface ModuleExprireTimeOptions extends ModuleOptions {
+  export interface ModuleExprireTimeOptions extends ModuleOptions {
     registry?: string;
   }
 
@@ -137,7 +137,6 @@ export namespace AutoImport {
     const modPath = Utils.setModulePath(modName, root);
     const modPkgPath = Utils.setModulePkgPath(modName, root);
     const localPkgInfo = Utils.readJSONSync(modPkgPath);
-    // module not exists, instll now
     if (!localPkgInfo) {
       Utils.logger(name, "not exists, installing right now...");
       return await installAndRequire(modName, {
@@ -161,7 +160,6 @@ export namespace AutoImport {
           return Utils.globalRequire(modPath);
         }
       } else {
-        // current module not expired, return current.
         if (
           localPkgInfo.__expire &&
           Utils.DEFAULT_TIME_NOW <= localPkgInfo.__expire
