@@ -1,7 +1,10 @@
 # auto-import.js
-
-[![npm version](https://badge.fury.io/js/@ffee%2Fauto-import.svg)](https://badge.fury.io/js/@ffee%2Fauto-import)
-
 A tool for automatically update and import NPM module
+
+<p align="center">
+  <a href="https://app.circleci.com/pipelines/github/ffee-team/auto-import?branch=main"><img src="https://img.shields.io/circleci/build/github/ffee-team/auto-import/main.svg?sanitize=true" alt="Build Status"></a>
+  <a href="https://www.npmjs.com/package/@ffee/auto-import"><img src="https://badge.fury.io/js/@ffee%2Fauto-import.svg" alt="npm version" height="18"></a>
+</p>
+
 
 > doc? waiting, plz ^_^
