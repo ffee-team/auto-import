@@ -13,12 +13,11 @@
 #           # Relevant tags can be found on the CircleCI Developer Hub
 #           # https://circleci.com/developer/images/image/cimg/node
 
-
 version: 2.1
 
 orbs:
-  # coveralls: coveralls/coveralls@3.1.1
-  node: circleci/node@4.1
+  coveralls: coveralls/coveralls@1.0.6
+  node: circleci/node@1.1.6
 
 jobs:
   build-1:
@@ -31,12 +30,13 @@ jobs:
       - node/with-cache:
           steps:
             - run: npm install
-            - run: npm test
+            - run: npm run jest
 
       - coveralls/upload:
           parallel: true
           flag_name: Test 1
           verbose: true
+
   done:
     executor:
       name: node/default
@@ -46,7 +46,7 @@ jobs:
           parallel_finished: true
 
 workflows:
-  test_parallel_then_upload:
+  sample:
     jobs:
       - build-1
       - done:
