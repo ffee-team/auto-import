@@ -1,14 +1,14 @@
+# # This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
 version: 2.1
-orbs:
-  coveralls: coveralls/coveralls@1.0.6
 
-jobs:
-  build:
-    docker:
-      - image: 'circleci/node:10.0.0'
-    steps:
-      - checkout
-      - run:
-          name: Install and Make
-          command: npm install && npm run test
-      - coveralls/upload
+orbs:
+  node: circleci/node@4.1
+
+workflows:
+  sample:
+    jobs:
+      - node/test:
+          version: '14.17'
+          # This is the node version to use for the `cimg/node` tag
+          # Relevant tags can be found on the CircleCI Developer Hub
+          # https://circleci.com/developer/images/image/cimg/node
