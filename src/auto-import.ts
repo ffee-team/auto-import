@@ -5,27 +5,37 @@ import { spawnSync, StdioOptions } from "child_process";
 import { Utils } from "./utils";
 
 export namespace AutoImport {
-  interface ModuleOptions {
+  export interface ModuleOptions {
+    /**
+     * Node module root dir
+     * @default process.cwd()
+     */
     root?: string;
+    /**
+     * NPM registry host
+     * @default https://registry.npmjs.org
+     */
+    registry?: string;
+
+    /**
+     * Node Module expiration time
+     */
     expire?: number;
-    version?: string;
   }
 
   export interface InstallModuleOptions extends ModuleOptions {
-    registry?: string;
     stdio?: StdioOptions;
   }
 
-  export interface RequireModuleOptions extends InstallModuleOptions { }
+  // export interface RequireModuleOptions extends InstallModuleOptions { }
 
-  export interface ModuleExprireTimeOptions extends ModuleOptions {
-    registry?: string;
-  }
+  // export interface ModuleExprireTimeOptions extends ModuleOptions { }
 
   /**
    * Get the latest package information of NPM module
    * @param {string} name NPM module name
-   * @param {string} registry npm registry host, default = https://registry.npmjs.org
+   * @param {string} registry npm registry host
+   *    @default https://registry.npmjs.org
    * @returns {any}
    */
   export const getNpmInfo = async (
@@ -64,11 +74,10 @@ export namespace AutoImport {
 
   export const setModuleExpireTime = (
     name: string,
-    opts: ModuleExprireTimeOptions = {}
+    opts: ModuleOptions = {}
   ) => {
     const { root = Utils.DEFAULT_ROOT, expire = 3600 * 24 } = opts;
-    const [modName] = Utils.formatModuleName(name);
-    const pkgPath = Utils.setModulePkgPath(modName, root);
+    const pkgPath = Utils.setModulePkgPath(name, root);
     try {
       const pkgInfo = Utils.readJSONSync(pkgPath);
       pkgInfo.__expire = Utils.setExpireTime(expire);
@@ -85,18 +94,16 @@ export namespace AutoImport {
    * Install npm module
    * @param {string} name
    * @param {InstallOptions} opts
-   * @returns {Promise<boolean>}
    */
   export const install = async (
     name: string,
     opts: InstallModuleOptions = {}
-  ): Promise<void> => {
+  ) => {
     const {
       root = Utils.DEFAULT_ROOT,
       registry = Utils.DEFAULT_REGISTRY,
       expire,
       stdio,
-      version,
       ...other
     } = opts;
     const installer = Utils.getNpmCommand("install");
@@ -112,72 +119,123 @@ export namespace AutoImport {
     });
   };
 
-  export const installAndRequire = async (
+  /**
+   * install NPM module and require it.
+   * @param {string} name 
+   * @param {InstallModuleOptions} opts 
+   * @returns {any}
+   */
+  export const installAndRequire = (
     name: string,
-    opts: RequireModuleOptions = {}
-  ) => {
+    opts: InstallModuleOptions = {}
+  ): any => {
+    install(name, opts);
+
     const { root = Utils.DEFAULT_ROOT } = opts;
     const [modName] = Utils.formatModuleName(name);
     const modPath = Utils.setModulePath(modName, root);
-    await install(name, opts);
-    setModuleExpireTime(name, opts);
-    try {
-      return Utils.globalRequire(modPath);
-    } catch (error) {
-      return null;
+    setModuleExpireTime(modName, opts);
+
+    return Utils.globalRequire(modPath);
+  };
+
+  export interface UpdateStatus {
+    // npm module name
+    name: string;
+    /**
+     * NPM module necessary to update?
+     */
+    status: boolean;
+    /**
+     * checked tips
+     */
+    message: string;
+
+    /**
+     * latest version of NPM module
+     */
+    latest?: string;
+  }
+  /**
+   * Check whether the NPM module needs to be updated
+   * @param {string} name npm module name
+   * @param {ModuleOptions} opts
+   * @returns {Promise<UpdateStatus>}
+   */
+  export const checkModuleUpdateStatus = async (
+    name: string,
+    opts: ModuleOptions = {},
+  ): Promise<UpdateStatus> => {
+    const { root = Utils.DEFAULT_ROOT } = opts;
+    const [modName, modVersion] = Utils.formatModuleName(name);
+    const modPkgPath = Utils.setModulePkgPath(modName, root);
+    const localPkgInfo = Utils.readJSONSync(modPkgPath);
+
+    if (!localPkgInfo) {
+      return {
+        status: true,
+        name: modName,
+        message: `${name} not existed, install right now...`,
+      };
+    }
+
+    if (modVersion) {
+      if (semver.lt(localPkgInfo.version, modVersion)) {
+        return {
+          status: true,
+          name: modName,
+          message: `${name} has existed, but version is low, install right now...`,
+        };
+      } else {
+        return {
+          status: false,
+          name: modName,
+          message: `${name} has existed a higher version, return currect now...`,
+        };
+      }
+    } else {
+      console.log('localPkgInfo.__expire', localPkgInfo.__expire);
+
+      if (localPkgInfo.__expire && localPkgInfo.__expire >= Utils.DEFAULT_TIME_NOW) {
+        return {
+          status: false,
+          name: modName,
+          message: `${name} not expired, return current...`,
+        };
+      }
+
+      const pkgInfo = await getNpmInfo(modName);
+      if (pkgInfo.status && semver.lt(localPkgInfo.version, pkgInfo.data.version)) {
+        return {
+          status: true,
+          name: modName,
+          message: `${name} expired, install and require...`,
+          latest: pkgInfo.data.version,
+        };
+      }
+
+      return {
+        status: false,
+        name: modName,
+        message: `${name} expired, but version is latest, return current...`,
+        latest: pkgInfo.data.version,
+      };
     }
   };
 
   export const require = async (
     name: string,
-    opts: RequireModuleOptions = {}
+    opts: InstallModuleOptions = {}
   ): Promise<any> => {
     const { root = Utils.DEFAULT_ROOT } = opts;
-    const [modName, modVersion] = Utils.formatModuleName(name);
-    const modPath = Utils.setModulePath(modName, root);
-    const modPkgPath = Utils.setModulePkgPath(modName, root);
-    const localPkgInfo = Utils.readJSONSync(modPkgPath);
-    if (!localPkgInfo) {
-      Utils.logger(name, "not exists, installing right now...");
-      return await installAndRequire(modName, {
-        version: modVersion,
-        ...opts,
-      });
-    } else {
-      if (modVersion) {
-        if (semver.lt(localPkgInfo.version, modVersion)) {
-          Utils.logger(
-            "local module",
-            name,
-            "exists, but version lower, installing right now..."
-          );
-          return await installAndRequire(name, {
-            version: modVersion,
-            ...opts,
-          });
-        } else {
-          Utils.logger("local module", name, "exists, required...");
-          return Utils.globalRequire(modPath);
-        }
-      } else {
-        if (
-          localPkgInfo.__expire &&
-          Utils.DEFAULT_TIME_NOW <= localPkgInfo.__expire
-        ) {
-          Utils.logger(name, "not expired, return current...");
-          return Utils.globalRequire(modPath);
-        }
+    const result = await checkModuleUpdateStatus(name, opts);
+    const modPath = Utils.setModulePath(result.name, root);
 
-        const pkgInfo = await getNpmInfo(modName);
-        if (pkgInfo.status && semver.lt(localPkgInfo.version, pkgInfo.data.version)) {
-          Utils.logger(name, "expired, install and require...");
-          return await installAndRequire(name, {
-            ...opts,
-          });
-        }
-
-        return Utils.globalRequire(modPath);
-      }
+    Utils.logger(result.message);
+    if (result.status) {
+      return installAndRequire(name, opts);
     }
+
+    return Utils.globalRequire(modPath);
   };
 }

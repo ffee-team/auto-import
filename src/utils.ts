@@ -11,7 +11,14 @@ export namespace Utils {
     return debug("auto-import:")(args.join(" "));
   };
 
-  export const globalRequire = (id: string) => require(id);
+  export const globalRequire = (id: string) => {
+    try {
+      return require(id)
+    } catch (error: any) {
+      logger(error.message);
+      return null;
+    }
+  };
 
   export const getNpmCommand = (cmd: string) => {
     return require.resolve(`npminstall/bin/${cmd}.js`);

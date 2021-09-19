@@ -11,13 +11,13 @@ describe("#auto-import tester", () => {
       return args.join(" ");
     };
   });
-  
+
   afterAll(() => {
     execSync('rm -rf ' + path.join(__dirname, 'node_modules'));
   });
 
   describe("#method: getNpmInfo", () => {
-    test('getNpmInfo success:', async() => {
+    test('getNpmInfo success:', async () => {
       const modName = "vue";
       const res1 = await AutoImport.getNpmInfo(modName);
       expect(res1.status).toBe(true);
@@ -28,15 +28,15 @@ describe("#auto-import tester", () => {
       expect(res2.data.name).toBe(modName);
     }, 10000);
 
-    test('getNpmInfo fail: get a not-exist-module', async() => {
+    test('getNpmInfo fail: get a not-exist-module', async () => {
       const modName = "not-exist-modules-a";
       const res = await AutoImport.getNpmInfo(modName);
       expect(res.status).toBe(false);
       expect(res.code).toBe(404);
       expect(res.error).toBe(null);
     }, 10000);
-    
-    test('getNpmInfo fail: get from error registry host', async() => {
+
+    test('getNpmInfo fail: get from error registry host', async () => {
       const modName = "not-exist-modules-b";
       const res = await AutoImport.getNpmInfo(modName, 'https://registry.npm.error-host.org');
       expect(res.status).toBe(false);
@@ -48,12 +48,12 @@ describe("#auto-import tester", () => {
   describe("#method: setModuleExpireTime", () => {
     const modName = "react";
     const root = __dirname;
-    const expire = 2000;
+    const expire = 20000;
 
     test("setModuleExpireTime: false", async () => {
       const modPkgPath = Utils.setModulePkgPath(modName, root);
       expect(fs.existsSync(modPkgPath)).toBe(false);
-      
+
       const res = AutoImport.setModuleExpireTime(modName, {
         root,
         expire
@@ -62,7 +62,7 @@ describe("#auto-import tester", () => {
     });
 
     test("setModuleExpireTime: true", async () => {
-      await AutoImport.install(modName);
+      AutoImport.install(modName);
       const modPkgPath = Utils.setModulePkgPath(modName, root);
       expect(fs.existsSync(modPkgPath)).toBe(true);
 
@@ -86,7 +86,7 @@ describe("#auto-import tester", () => {
   describe("#method: install", () => {
     test("install a module success: install('express')", async () => {
       const modName = "express";
-      await AutoImport.install(modName, { stdio: 'ignore' });
+      AutoImport.install(modName, { stdio: 'ignore' });
       const modPath = Utils.setModulePath(modName);
       expect(fs.existsSync(modPath + '/package.json')).toBe(true);
     });
@@ -94,10 +94,10 @@ describe("#auto-import tester", () => {
     test("install a module success: install('koa', __dirname)", async () => {
       const modName = "koa@1.7.0";
       const root = __dirname;
-      const [name, ver] = Utils.formatModuleName(modName);
+      const [name] = Utils.formatModuleName(modName);
       const modPath = Utils.setModulePath(name, root);
       expect(fs.existsSync(modPath + '/package.json')).toBe(false);
-      await AutoImport.install(modName, { root, expire: 0 });
+      AutoImport.install(modName, { root, expire: 0 });
       expect(fs.existsSync(modPath + '/package.json')).toBe(true);
     });
   });
@@ -109,13 +109,87 @@ describe("#auto-import tester", () => {
       const modPath = Utils.setModulePath(modName);
       expect(fs.existsSync(modPath + '/package.json')).toBe(false);
 
-      const mod = await AutoImport.installAndRequire(modName);
+      const mod = AutoImport.installAndRequire(modName);
       expect(typeof mod.createStore === "function").toBe(true);
     });
     test("installAndRequire module: fail", async () => {
       const modName = "a-fail-module-error";
-      const mod = await AutoImport.installAndRequire(modName, { root, stdio: 'ignore' });
+      const mod = AutoImport.installAndRequire(modName, { root, stdio: 'ignore' });
       expect(mod).toBe(null);
+    });
+  });
+
+  describe("#method: checkModuleUpdateStatus", () => {
+    const root = __dirname;
+    test("checkModuleUpdateStatus: not existed, install right now", async () => {
+      const modName = "a-not-exist-module";
+      const modPath = Utils.setModulePath(modName);
+      expect(fs.existsSync(modPath + '/package.json')).toBe(false);
+      const res = await AutoImport.checkModuleUpdateStatus(modName);
+
+      expect(res.status).toBe(true);
+      expect(res.message).toBe(`${modName} not existed, install right now...`);
+    });
+
+    test("checkModuleUpdateStatus: has existed a higher version, return currect now...", async () => {
+      const modName = "react@15.6.2";
+      const [name] = Utils.formatModuleName(modName);
+      const modPath = Utils.setModulePath(name, root);
+
+      expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+      const res = await AutoImport.checkModuleUpdateStatus(modName, { root });
+
+      expect(res.status).toBe(false);
+      expect(res.message).toBe(`${modName} has existed a higher version, return currect now...`);
+    });
+
+    test("checkModuleUpdateStatus: has existed, but version is low, install right now...", async () => {
+      const modName = "react@18.1.0";
+      const [name] = Utils.formatModuleName(modName);
+      const modPath = Utils.setModulePath(name, root);
+
+      expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+      const res = await AutoImport.checkModuleUpdateStatus(modName, { root });
+
+      expect(res.status).toBe(true);
+      expect(res.message).toBe(`${modName} has existed, but version is low, install right now...`);
+    });
+
+    test("checkModuleUpdateStatus: not expired, return current...", async () => {
+      const modName = "react";
+      const [name] = Utils.formatModuleName(modName);
+      const modPath = Utils.setModulePath(name);
+
+      expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+      const res = await AutoImport.checkModuleUpdateStatus(modName);
+
+      expect(res.status).toBe(false);
+      expect(res.message).toBe(`${modName} not expired, return current...`);
+    });
+
+    test("checkModuleUpdateStatus: expired, install and require...", async () => {
+      const modName = "koa";
+      const modPath = Utils.setModulePath(modName);
+      AutoImport.setModuleExpireTime(modName, { expire: -1000 });
+
+      expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+      const res = await AutoImport.checkModuleUpdateStatus(modName);
+      console.log(res);
+
+      expect(res.status).toBe(true);
+      expect(res.message).toBe(`${modName} expired, install and require...`);
+    });
+
+    test("checkModuleUpdateStatus: expired, but version is latest, return current...", async () => {
+      const modName = "express";
+      const modPath = Utils.setModulePath(modName);
+      AutoImport.setModuleExpireTime(modName, { expire: -1000 });
+
+      expect(fs.existsSync(modPath + '/package.json')).toBe(true);
+      const res = await AutoImport.checkModuleUpdateStatus(modName);
+
+      expect(res.status).toBe(false);
+      expect(res.message).toBe(`${modName} expired, but version is latest, return current...`);
     });
   });
 

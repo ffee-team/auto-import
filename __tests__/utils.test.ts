@@ -49,9 +49,14 @@ describe("#Utils tester", () => {
   });
 
   describe("Utils.globalRequire", () => {
-    test("Utils.globalRequire('debug')", async () => {
-      const res: any = Utils.globalRequire("debug");
+    test("Utils.globalRequire: success", async () => {
+      const res = Utils.globalRequire("debug");
       expect(res.debug).toEqual(res.default);
+    });
+
+    test("Utils.globalRequire: fail", async () => {
+      const res = Utils.globalRequire("un-exist-module-xxx");
+      expect(res).toEqual(null);
     });
   });
 
