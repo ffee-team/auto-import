@@ -174,7 +174,6 @@ describe("#auto-import tester", () => {
 
       expect(fs.existsSync(modPath + '/package.json')).toBe(true);
       const res = await AutoImport.checkModuleUpdateStatus(modName);
-      console.log(res);
 
       expect(res.status).toBe(true);
       expect(res.message).toBe(`${modName} expired, install and require...`);
