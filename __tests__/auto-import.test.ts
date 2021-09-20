@@ -102,23 +102,6 @@ describe("#auto-import tester", () => {
     });
   });
 
-  describe("#method: installAndRequire", () => {
-    const root = __dirname;
-    test("installAndRequire module: success", async () => {
-      const modName = "redux";
-      const modPath = Utils.setModulePath(modName);
-      expect(fs.existsSync(modPath + '/package.json')).toBe(false);
-
-      const mod = AutoImport.installAndRequire(modName);
-      expect(typeof mod.createStore === "function").toBe(true);
-    });
-    test("installAndRequire module: fail", async () => {
-      const modName = "a-fail-module-error";
-      const mod = AutoImport.installAndRequire(modName, { root, stdio: 'ignore' });
-      expect(mod).toBe(null);
-    });
-  });
-
   describe("#method: checkModuleUpdateStatus", () => {
     const root = __dirname;
     test("checkModuleUpdateStatus: not existed, install right now", async () => {

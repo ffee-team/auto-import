@@ -27,10 +27,6 @@ export namespace AutoImport {
     stdio?: StdioOptions;
   }
 
-  // export interface RequireModuleOptions extends InstallModuleOptions { }
-
-  // export interface ModuleExprireTimeOptions extends ModuleOptions { }
-
   /**
    * Get the latest package information of NPM module
    * @param {string} name NPM module name
@@ -119,26 +115,6 @@ export namespace AutoImport {
     });
   };
 
-  /**
-   * install NPM module and require it.
-   * @param {string} name 
-   * @param {InstallModuleOptions} opts 
-   * @returns {any}
-   */
-  export const installAndRequire = (
-    name: string,
-    opts: InstallModuleOptions = {}
-  ): any => {
-    install(name, opts);
-
-    const { root = Utils.DEFAULT_ROOT } = opts;
-    const [modName] = Utils.formatModuleName(name);
-    const modPath = Utils.setModulePath(modName, root);
-    setModuleExpireTime(modName, opts);
-
-    return Utils.globalRequire(modPath);
-  };
-
   export interface UpdateStatus {
     // npm module name
     name: string;
@@ -194,8 +170,6 @@ export namespace AutoImport {
         };
       }
     } else {
-      console.log('localPkgInfo.__expire', localPkgInfo.__expire);
-
       if (localPkgInfo.__expire && localPkgInfo.__expire >= Utils.DEFAULT_TIME_NOW) {
         return {
           status: false,
@@ -233,7 +207,11 @@ export namespace AutoImport {
 
     Utils.logger(result.message);
     if (result.status) {
-      return installAndRequire(name, opts);
+      install(name, opts);
+    }
+
+    if (result.latest) {
+      setModuleExpireTime(result.name, opts);
     }
 
     return Utils.globalRequire(modPath);
