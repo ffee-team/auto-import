@@ -1,16 +1,21 @@
 const AutoImport = require('../lib');
 
-AutoImport.require('koa').then(res => {
+AutoImport.checkModuleUpdateStatus('koa').then(res => {
   console.log(res);
+  // {
+  //   name: 'koa',
+  //   status: false,
+  //   message: 'koa had not expired, return current...'
+  // }
 });
 
-// AutoImport.require('koa').then((mod) => {
-//   console.log(mod);
+AutoImport.require('koa').then((mod) => {
+  const app = new mod();
+  app.use(async ctx => {
+    ctx.body = 'Hello World!';
+  });
 
-//   const app = new mod();
-//   app.use(async ctx => {
-//     ctx.body = 'Hello World!';
-//   });
-
-//   app.listen(3000);
-// });
+  const server = app.listen(3000, () => {
+    server.close();
+  });
+});

@@ -1,4 +1,5 @@
 # auto-import.js
+
 A tool for automatically update and import NPM module
 
 <p align="center">
@@ -7,5 +8,41 @@ A tool for automatically update and import NPM module
   <a href="https://app.circleci.com/pipelines/github/ffee-team/auto-import/11/workflows/445ff3bf-7112-489c-b7fe-278f2a8ffcf1/jobs/11/parallel-runs/0/steps/0-106"><img src="https://img.shields.io/badge/Coverage-100%25-green" alt="Code Coverage" height="18"></a>
 </p>
 
+## Usage
 
-> doc? waiting, plz ^_^
+### AutoImport.require
+Require the node module. If the module is not installed, install it automatically before loading it.
+
+```js
+const AutoImport = require('@ffee/auto-import');
+
+AutoImport.require('koa').then(res => {
+  const app = new mod();
+  app.use(async ctx => {
+    ctx.body = 'Hello World!';
+  });
+
+  app.listen(3000);
+});
+```
+
+### AutoImport.checkModuleUpdateStatus
+
+Check whether the NPM module needs to be updated
+
+```js
+const AutoImport = require('@ffee/auto-import');
+
+AutoImport.checkModuleUpdateStatus('koa').then(res => {
+  console.log(res);
+  // {
+  //   name: 'koa',
+  //   status: false,
+  //   message: 'koa had not expired, return current...'
+  // }
+});
+```
+
+## LICENSE
+
+MIT.

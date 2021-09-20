@@ -11,6 +11,7 @@ export namespace AutoImport {
      * @default process.cwd()
      */
     root?: string;
+
     /**
      * NPM registry host
      * @default https://registry.npmjs.org
@@ -29,7 +30,7 @@ export namespace AutoImport {
 
   /**
    * Get the latest package information of NPM module
-   * @param {string} name NPM module name
+   * @param {string} name Node module name
    * @param {string} registry npm registry host
    *    @default https://registry.npmjs.org
    * @returns {any}
@@ -68,6 +69,13 @@ export namespace AutoImport {
     );
   };
 
+  /**
+   * Set the expiration time of the module
+   * 
+   * @param {string} name Node module name
+   * @param {ModuleOptions} opts 
+   * @returns {boolean}
+   */
   export const setModuleExpireTime = (
     name: string,
     opts: ModuleOptions = {}
@@ -88,7 +96,7 @@ export namespace AutoImport {
 
   /**
    * Install npm module
-   * @param {string} name
+   * @param {string} name Node module name
    * @param {InstallOptions} opts
    */
   export const install = async (
@@ -116,12 +124,14 @@ export namespace AutoImport {
   };
 
   export interface UpdateStatus {
-    // npm module name
+    // Node module name
     name: string;
+
     /**
      * NPM module necessary to update?
      */
     status: boolean;
+
     /**
      * checked tips
      */
@@ -132,9 +142,10 @@ export namespace AutoImport {
      */
     latest?: string;
   }
+
   /**
    * Check whether the NPM module needs to be updated
-   * @param {string} name npm module name
+   * @param {string} name Node module name
    * @param {ModuleOptions} opts
    * @returns {Promise<UpdateStatus>}
    */
@@ -149,41 +160,41 @@ export namespace AutoImport {
 
     if (!localPkgInfo) {
       return {
-        status: true,
         name: modName,
-        message: `${name} not existed, install right now...`,
+        status: true,
+        message: `${name} had not existed, install right now...`,
       };
     }
 
     if (modVersion) {
       if (semver.lt(localPkgInfo.version, modVersion)) {
         return {
-          status: true,
           name: modName,
+          status: true,
           message: `${name} has existed, but version is low, install right now...`,
         };
       } else {
         return {
-          status: false,
           name: modName,
+          status: false,
           message: `${name} has existed a higher version, return currect now...`,
         };
       }
     } else {
       if (localPkgInfo.__expire && localPkgInfo.__expire >= Utils.DEFAULT_TIME_NOW) {
         return {
-          status: false,
           name: modName,
-          message: `${name} not expired, return current...`,
+          status: false,
+          message: `${name} had not expired, return current...`,
         };
       }
 
       const pkgInfo = await getNpmInfo(modName);
       if (pkgInfo.status && semver.lt(localPkgInfo.version, pkgInfo.data.version)) {
         return {
-          status: true,
           name: modName,
-          message: `${name} expired, install and require...`,
+          status: true,
+          message: `${name} had expired, install and require...`,
           latest: pkgInfo.data.version,
         };
       }
@@ -191,12 +202,20 @@ export namespace AutoImport {
       return {
         status: false,
         name: modName,
-        message: `${name} expired, but version is latest, return current...`,
+        message: `${name} had expired, but version is latest, return current...`,
         latest: pkgInfo.data.version,
       };
     }
   };
 
+  /**
+   * require node modeule
+   * @desc Require the node module. If the module is not installed, install it automatically before loading it.
+   * 
+   * @param {string} name Node module name
+   * @param {InstallModuleOptions} opts
+   * @returns {Promise<any>}
+   */
   export const require = async (
     name: string,
     opts: InstallModuleOptions = {}

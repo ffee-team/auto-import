@@ -104,14 +104,14 @@ describe("#auto-import tester", () => {
 
   describe("#method: checkModuleUpdateStatus", () => {
     const root = __dirname;
-    test("checkModuleUpdateStatus: not existed, install right now", async () => {
+    test("checkModuleUpdateStatus: had not existed, install right now", async () => {
       const modName = "a-not-exist-module";
       const modPath = Utils.setModulePath(modName);
       expect(fs.existsSync(modPath + '/package.json')).toBe(false);
       const res = await AutoImport.checkModuleUpdateStatus(modName);
 
       expect(res.status).toBe(true);
-      expect(res.message).toBe(`${modName} not existed, install right now...`);
+      expect(res.message).toBe(`${modName} had not existed, install right now...`);
     });
 
     test("checkModuleUpdateStatus: has existed a higher version, return currect now...", async () => {
@@ -138,7 +138,7 @@ describe("#auto-import tester", () => {
       expect(res.message).toBe(`${modName} has existed, but version is low, install right now...`);
     });
 
-    test("checkModuleUpdateStatus: not expired, return current...", async () => {
+    test("checkModuleUpdateStatus: had not expired, return current...", async () => {
       const modName = "react";
       const [name] = Utils.formatModuleName(modName);
       const modPath = Utils.setModulePath(name);
@@ -147,10 +147,10 @@ describe("#auto-import tester", () => {
       const res = await AutoImport.checkModuleUpdateStatus(modName);
 
       expect(res.status).toBe(false);
-      expect(res.message).toBe(`${modName} not expired, return current...`);
+      expect(res.message).toBe(`${modName} had not expired, return current...`);
     });
 
-    test("checkModuleUpdateStatus: expired, install and require...", async () => {
+    test("checkModuleUpdateStatus: had expired, install and require...", async () => {
       const modName = "koa";
       const modPath = Utils.setModulePath(modName);
       AutoImport.setModuleExpireTime(modName, { expire: -1000 });
@@ -159,10 +159,10 @@ describe("#auto-import tester", () => {
       const res = await AutoImport.checkModuleUpdateStatus(modName);
 
       expect(res.status).toBe(true);
-      expect(res.message).toBe(`${modName} expired, install and require...`);
+      expect(res.message).toBe(`${modName} had expired, install and require...`);
     });
 
-    test("checkModuleUpdateStatus: expired, but version is latest, return current...", async () => {
+    test("checkModuleUpdateStatus: had expired, but version is latest, return current...", async () => {
       const modName = "express";
       const modPath = Utils.setModulePath(modName);
       AutoImport.setModuleExpireTime(modName, { expire: -1000 });
@@ -171,7 +171,7 @@ describe("#auto-import tester", () => {
       const res = await AutoImport.checkModuleUpdateStatus(modName);
 
       expect(res.status).toBe(false);
-      expect(res.message).toBe(`${modName} expired, but version is latest, return current...`);
+      expect(res.message).toBe(`${modName} had expired, but version is latest, return current...`);
     });
   });
 
