@@ -16,8 +16,8 @@ Require the node module. If the module is not installed, install it automaticall
 ```js
 const AutoImport = require('@ffee/auto-import');
 
-AutoImport.require('koa').then(res => {
-  const app = new mod();
+AutoImport.require('koa').then(koa => {
+  const app = new koa();
   app.use(async ctx => {
     ctx.body = 'Hello World!';
   });
