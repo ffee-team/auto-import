@@ -10,7 +10,14 @@ A tool for automatically update and import NPM module
 
 ## Usage
 
+### Install
+
+```bash
+npm i @ffee/auto-import --save
+```
+
 ### AutoImport.require
+
 Require the node module. If the module is not installed, install it automatically before loading it.
 
 ```js
@@ -28,7 +35,7 @@ AutoImport.require('koa').then(koa => {
 
 ### AutoImport.checkModuleUpdateStatus
 
-Check whether the NPM module needs to be updated
+Check whether the NPM module needs to be updated.
 
 ```js
 const AutoImport = require('@ffee/auto-import');
