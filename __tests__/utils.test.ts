@@ -1,5 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
+import http from "http";
 import debug from "debug";
 import { Utils } from "../src/utils";
 
@@ -157,6 +158,38 @@ describe("#Utils tester", () => {
 
       expect(result).toEqual(true);
       expect(JSON.parse(jsonString)).toEqual(data);
+    });
+  });
+
+  describe("Utils.catchError", () => {
+    test("Utils.catchError: default", async () => {
+      const result = Utils.catchError({}, 500);
+      expect(result.status).toBe(false);
+      expect(result.code).toBe(500);
+    });
+    test("Utils.catchError: -3008", async () => {
+      const err = new Promise((resolve) => {
+        http.get('http://no-exists-web.xx.xxx.xx').on('error', (error) => {
+          resolve(error);
+        });
+      });
+
+      const result = Utils.catchError(await err);
+      expect(result.status).toBe(false);
+      expect(result.code).toBe(-3008);
+    });
+  });
+
+  describe("Utils.catchJSONparse", () => {
+    test("Utils.catchJSONparse: true", async () => {
+      const result = Utils.catchJSONparse("{}");
+      expect(result.status).toBe(true);
+      expect(result.code).toBe(200);
+    });
+    test("Utils.catchError: false", async () => {
+      const result = Utils.catchJSONparse("{12121=2323}");
+      expect(result.status).toBe(false);
+      expect(result.code).toBe(-500);
     });
   });
 });

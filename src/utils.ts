@@ -77,8 +77,20 @@ export namespace Utils {
     const err = JSON.parse(JSON.stringify(error));
     return {
       status: false,
-      code: err?.errno || defaultCode,
+      code: err.errno || defaultCode,
       error: err
     };
+  };
+
+  export const catchJSONparse = (str: string) => {
+    try {
+      return {
+        status: true,
+        code: 200,
+        data: JSON.parse(str)
+      };
+    } catch (error: any) {
+      return catchError({ message: error.message });
+    }
   };
 }

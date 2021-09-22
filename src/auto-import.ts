@@ -55,21 +55,9 @@ export namespace AutoImport {
         } else {
           let chunk = '';
           res.on('data', c => chunk += c)
-            .on('end', () => {
-              try {
-                resolve({
-                  status: true,
-                  code: 200,
-                  data: JSON.parse(chunk)
-                });
-              } catch (error) {
-                return resolve(Utils.catchError(error, -200));
-              }
-            });
+            .on('end', () => resolve(Utils.catchJSONparse(chunk)));
         }
-      }).on('error', (err) => {
-        return resolve(Utils.catchError(err))
-      })
+      }).on('error', (err) => resolve(Utils.catchError(err)))
     });
   };
 
