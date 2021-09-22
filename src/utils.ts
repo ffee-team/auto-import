@@ -72,4 +72,13 @@ export namespace Utils {
     fs.writeJSONSync(jsonPath, json);
     return true;
   };
+
+  export const catchError = (error: Error | unknown, defaultCode = -500) => {
+    const err = JSON.parse(JSON.stringify(error));
+    return {
+      status: false,
+      code: err?.errno || defaultCode,
+      error: err
+    };
+  };
 }

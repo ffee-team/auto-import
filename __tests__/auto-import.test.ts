@@ -40,7 +40,7 @@ describe("#auto-import tester", () => {
       const modName = "not-exist-modules-b";
       const res = await AutoImport.getNpmInfo(modName, 'https://registry.npm.error-host.org');
       expect(res.status).toBe(false);
-      expect(res.code).toBe(500);
+      expect(res.code).toBe(-3008);
       expect(res.error.code).toBe('ENOTFOUND');
     }, 10000);
   });

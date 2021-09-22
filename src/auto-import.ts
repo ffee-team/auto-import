@@ -1,6 +1,6 @@
-// import fs from "fs-extra";
 import semver from "semver";
-import request from "request";
+import http from "http";
+import https from "https";
 import { spawnSync, StdioOptions } from "child_process";
 import { Utils } from "./utils";
 
@@ -41,32 +41,36 @@ export namespace AutoImport {
   ): Promise<any> => {
     const url = `${registry}/${encodeURIComponent(name)}/latest`;
     Utils.logger("getNpmInfo:", url);
+    const request = url.startsWith('https') ? https : http;
 
-    return new Promise((resolve) =>
-      request(url, (error, response, body) => {
-        if (error) {
+    return new Promise((resolve) => {
+      request.get(url, (res) => {
+        res.setEncoding('utf8');
+        if (res.statusCode !== 200) {
           resolve({
             status: false,
-            code: 500,
-            error: JSON.parse(JSON.stringify(error))
+            code: res.statusCode,
+            error: null
           });
         } else {
-          if (response && response.statusCode === 200 && body) {
-            resolve({
-              status: true,
-              code: 200,
-              data: JSON.parse(body)
+          let chunk = '';
+          res.on('data', c => chunk += c)
+            .on('end', () => {
+              try {
+                resolve({
+                  status: true,
+                  code: 200,
+                  data: JSON.parse(chunk)
+                });
+              } catch (error) {
+                return resolve(Utils.catchError(error, -200));
+              }
             });
-          } else {
-            resolve({
-              status: false,
-              code: response.statusCode,
-              error: null
-            });
-          }
         }
+      }).on('error', (err) => {
+        return resolve(Utils.catchError(err))
       })
-    );
+    });
   };
 
   /**

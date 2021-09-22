@@ -7,7 +7,6 @@
   "scripts": {
     "test": "npm run jest",
     "jest": "jest",
-    "cov": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "dev": "tsc --watch",
     "build": "npm run clean && tsc",
     "clean": "rm -rf ./lib",
@@ -36,10 +35,8 @@
     "@types/fs-extra": "^9.0.12",
     "@types/jest": "^27.0.1",
     "@types/node": "^10.17.60",
-    "@types/request": "^2.48.7",
     "@types/semver": "^7.3.8",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
-    "coveralls": "^3.1.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb": "^18.2.1",
     "jest": "^27.1.1",
@@ -51,7 +48,6 @@
     "debug": "^4.3.2",
     "fs-extra": "^10.0.0",
     "npminstall": "^4.11.0",
-    "request": "^2.88.2",
     "semver": "^7.3.5"
   },
   "engines": {

@@ -1,6 +1,6 @@
-const AutoImport = require('../lib');
+const { AutoImport } = require('../lib/auto-import');
 
-AutoImport.checkModuleUpdateStatus('koa').then(res => {
+AutoImport.getNpmInfo('koa', 'https://registry.npm.error-host.org').then(res => {
   console.log(res);
   // {
   //   name: 'koa',
@@ -9,13 +9,13 @@ AutoImport.checkModuleUpdateStatus('koa').then(res => {
   // }
 });
 
-AutoImport.require('koa').then((mod) => {
-  const app = new mod();
-  app.use(async ctx => {
-    ctx.body = 'Hello World!';
-  });
+// AutoImport.require('koa').then((mod) => {
+//   const app = new mod();
+//   app.use(async ctx => {
+//     ctx.body = 'Hello World!';
+//   });
 
-  const server = app.listen(3000, () => {
-    server.close();
-  });
-});
+//   const server = app.listen(3000, () => {
+//     server.close();
+//   });
+// });
