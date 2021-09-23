@@ -5,7 +5,7 @@ A tool for automatically update and import NPM module
 <p align="center">
   <a href="https://www.npmjs.com/package/@ffee/auto-import"><img src="https://badge.fury.io/js/@ffee%2Fauto-import.svg" alt="npm version" height="18"></a>
   <a href="https://app.circleci.com/pipelines/github/ffee-team/auto-import?branch=main"><img src="https://img.shields.io/circleci/build/github/ffee-team/auto-import/main.svg?sanitize=true" alt="Build Status"></a>
-  <a href="https://app.circleci.com/pipelines/github/ffee-team/auto-import/32/workflows/a4225207-f54a-4e59-975b-dea0eb9cc4fc/jobs/33/parallel-runs/0/steps/0-106"><img src="https://img.shields.io/badge/Coverage-100%25-green" alt="Code Coverage" height="18"></a>
+  <a href="https://app.circleci.com/pipelines/github/ffee-team/auto-import/39/workflows/ba4683c3-2ed3-4b25-8d99-5af6c5685d02/jobs/40/parallel-runs/0/steps/0-106"><img src="https://img.shields.io/badge/Coverage-100%25-green" alt="Code Coverage" height="18"></a>
 </p>
 
 ## Usage
