@@ -5,11 +5,6 @@ import debug from "debug";
 import { Utils } from "../src/utils";
 
 describe("#Utils tester", () => {
-  // beforeAll(() => {
-  //   (Utils as any).logger = (...args: string[]) => {
-  //     return args.join(" ");
-  //   };
-  // });
   describe("#static: DEFAULT", () => {
     test("DEFAULT_TIME_NOW", async () => {
       expect(Utils.DEFAULT_TIME_NOW < Date.now()).toEqual(true);
@@ -189,7 +184,7 @@ describe("#Utils tester", () => {
     test("Utils.catchError: false", async () => {
       const result = Utils.catchJSONparse("{12121=2323}");
       expect(result.status).toBe(false);
-      expect(result.code).toBe(-500);
+      expect(result.code).toBe(-200);
     });
   });
 });

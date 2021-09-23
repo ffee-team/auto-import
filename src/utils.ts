@@ -90,7 +90,7 @@ export namespace Utils {
         data: JSON.parse(str)
       };
     } catch (error: any) {
-      return catchError({ message: error.message });
+      return catchError({ message: error.message }, -200);
     }
   };
 }
