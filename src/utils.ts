@@ -40,7 +40,7 @@ export namespace Utils {
 
   /**
    * set expire time
-   * @param {number} expireTime module expire time
+   * @param {number} expireTime module expire time (unit: second)
    */
   export const setExpireTime = (expireTime: number) => {
     return DEFAULT_TIME_NOW + expireTime * 1000;

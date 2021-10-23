@@ -20,6 +20,7 @@ export namespace AutoImport {
 
     /**
      * Node Module expiration time
+     * @default {number} expire = 24 * 3600 (second) =  1 (day)
      */
     expire?: number;
   }
