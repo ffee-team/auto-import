@@ -6,6 +6,13 @@ import { Utils } from "../src/utils";
 
 describe("#Utils tester", () => {
   describe("#static: DEFAULT", () => {
+    const REGISTRY = "https://registry.npmjs.org";
+    beforeAll(() => {
+      process.env.REGISTRY = REGISTRY;
+    });
+    afterAll(() => {
+      process.env.REGISTRY = undefined;
+    });
     test("DEFAULT_TIME_NOW", async () => {
       expect(Utils.DEFAULT_TIME_NOW < Date.now()).toEqual(true);
     });
@@ -13,7 +20,7 @@ describe("#Utils tester", () => {
       expect(process.cwd()).toEqual(Utils.DEFAULT_ROOT);
     });
     test("DEFAULT_REGISTRY", async () => {
-      expect(Utils.DEFAULT_REGISTRY === "https://registry.npmjs.org").toEqual(
+      expect(Utils.DEFAULT_REGISTRY === REGISTRY).toEqual(
         true
       );
     });
