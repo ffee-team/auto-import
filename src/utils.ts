@@ -13,7 +13,7 @@ export namespace Utils {
 
   export const globalRequire = (id: string) => {
     try {
-      return require(id)
+      return require(id);
     } catch (error: any) {
       logger(error.message);
       return null;
